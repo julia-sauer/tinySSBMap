@@ -1,0 +1,7 @@
+{
+  "name": "Mini Map",
+  "description": "A visual map so share the location and see the location of others.",
+  "icon": "assets/map.svg",
+  "init": "console.log('Map not ready!')",
+  "id": "map"
+}
