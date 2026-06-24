@@ -12,6 +12,8 @@ function load_prod_list() {
                    'Create and participate in quizzes - a fun way for users to test their knowledge and learn new information.<br><em>Authors: Anoozh Akileswaran, Prabavan Balasubramaniam and Jakob Spiess</em>');
     load_prod_item('Lokens (coming soon)', 'prod/hand_and_coins.svg', null /* 'xyz' */,
                    'see Erick Lavoie: <em>GOC-Ledger: State-based Conflict-Free Replicated Ledger from Grow-Only Counters</em>, <a href="https://arxiv.org/abs/2305.16976">https://arxiv.org/abs/2305.16976</a>');
+    load_prod_item('Map', 'prod/map/map.svg', 'setScenario("map")',
+                   'See and share your location with nobody, your friends or with everybody, create your own markers at relevant locations and see the markers of others.');
 }
 
 function load_prod_item(title, imageName, fct, descr) {
