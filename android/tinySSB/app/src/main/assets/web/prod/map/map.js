@@ -9,3 +9,7 @@ const Operation = {
     PRIVACY_CHANGE: 'map/privacy/change',
     LEAVE: 'leave'
 }
+
+function load_map() {
+    console.log("MAP OPENED");
+}

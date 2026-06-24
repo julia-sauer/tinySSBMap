@@ -28,6 +28,7 @@ var scenarioDisplay = {
     'board': ['div:back', 'core', 'div:board'], // KANBAN
     'tictactoe-list': ['div:back', 'core', 'div:tictactoe_list', 'plus'],
     'tictactoe-board': ['div:back', 'core', 'div:tictactoe_board'],
+    'map': ['div:back', 'core', 'div:map'],
 }
 
 var scenarioMenu = {
@@ -118,6 +119,8 @@ function onBackPressed() {
         setScenario('games')
     else if (curr_scenario == 'tictactoe-board')
         setScenario('tictactoe-list')
+    else if (curr_scenario == 'map')
+        setScenario('productivity')
 }
 
 function setScenario(s) {
@@ -208,6 +211,15 @@ function setScenario(s) {
             if(!personalBoardAlreadyExists && display_create_personal_board) {
                 menu_create_personal_board()
             }
+        }
+
+        if (s == 'map') {
+            load_map();
+
+            document.getElementById("tremolaTitle").style.display = 'none';
+            var c = document.getElementById("conversationTitle");
+            c.style.display = null;
+            c.innerHTML = "<font size=+1><strong>Map</strong></font>";
         }
 
         if (s == 'posts') {
