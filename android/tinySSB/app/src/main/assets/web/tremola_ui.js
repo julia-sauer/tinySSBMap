@@ -28,7 +28,7 @@ var scenarioDisplay = {
     'board': ['div:back', 'core', 'div:board'], // KANBAN
     'tictactoe-list': ['div:back', 'core', 'div:tictactoe_list', 'plus'],
     'tictactoe-board': ['div:back', 'core', 'div:tictactoe_board'],
-    'map': ['div:back', 'core', 'div:map'],
+    'map': ['div:back', 'core', 'div:map'], //offline Map
 }
 
 var scenarioMenu = {
