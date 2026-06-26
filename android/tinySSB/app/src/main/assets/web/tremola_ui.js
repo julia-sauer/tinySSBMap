@@ -9,7 +9,8 @@ var display_or_not = [
     'lst:chats', 'lst:prod', 'lst:games', 'lst:contacts', 'lst:members',
     'div:posts', 'lst:kanban', 'div:board',
     'div:footer', 'div:textarea', 'div:confirm-members', 'div:settings',
-    'div:tictactoe_list', 'div:tictactoe_board'
+    'div:tictactoe_list', 'div:tictactoe_board',
+    'div:map',
 ];
 
 var prev_scenario = 'chats';
