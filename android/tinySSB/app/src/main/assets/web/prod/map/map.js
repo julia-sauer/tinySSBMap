@@ -1,6 +1,7 @@
 // map.js
 
 let map = null;
+let myLocationMarker = null;
 
 function load_map() {
     console.log("MAP OPENED");
@@ -15,4 +16,31 @@ function load_map() {
             minZoom: 0,
         }).addTo(map);
     }
+
+    map.invalidateSize();
+
+    navigator.geolocation.getCurrentPosition(
+        function(pos) {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+
+            map.setView([lat, lon], 14);
+
+            if (myLocationMarker !== null) {
+                myLocationMarker.setLatLng([lat, lon]);
+            } else {
+                myLocationMarker = L.marker([lat, lon])
+                .addTo(map)
+                .bindPopup("You are here");
+            }
+        },
+        function(err) {
+            console.log("GPS error:", err.message);
+        },
+        {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 30000
+        }
+    );
 }

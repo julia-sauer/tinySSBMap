@@ -33,6 +33,8 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.webkit.WebViewAssetLoader
 import androidx.webkit.WebViewAssetLoader.AssetsPathHandler
 import androidx.webkit.WebViewClientCompat
+import android.webkit.GeolocationPermissions
+import android.webkit.WebChromeClient
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.google.zxing.integration.android.IntentIntegrator
@@ -164,6 +166,17 @@ class MainActivity : Activity() {
 
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
+
+        webView.settings.setGeolocationEnabled(true)
+
+        webView.webChromeClient = object : WebChromeClient() {
+            override fun onGeolocationPermissionsShowPrompt(
+                origin: String?,
+                callback: GeolocationPermissions.Callback?
+            ) {
+                callback?.invoke(origin, true, false)
+            }
+        }
 
         webView.loadUrl("https://appassets.androidplatform.net/assets/web/tremola.html")
 
