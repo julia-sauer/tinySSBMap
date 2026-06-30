@@ -10,6 +10,7 @@
   <!-- link rel="stylesheet" type="text/css" href="prod/dpi24-14-sched/scheduling.css" media="screen" / -->
   <!-- link rel="stylesheet" type="text/css" href="prod/dpi24-15-kahoot/kahoot.css" media="screen" / -->
   <link rel="stylesheet" type="text/css" href="prod/map/leaflet/leaflet.css" />
+  <link rel="stylesheet" href="prod/map/map.css">
   <script type="text/javascript" charset="UTF-8" src="prod/map/leaflet/leaflet.js"></script>
   <script type="text/javascript" charset="UTF-8" src="util/bipf.js"></script>
   <script type="text/javascript" charset="UTF-8" src="util/scuttlesort.js"></script>
@@ -314,7 +315,35 @@
 
     </div>
 
-    <div id="div:map" style="display: none; height: 100%; width: 100%"></div>
+    <div id="div:map" style="display: none; height: 100%; width: 100%; position: relative;">
+      <div id="map-buttons" class="map_buttons_container">
+        <button class="map_create_marker_btn" style="background-image: url('prod/map/leaflet/images/marker-icon-2x.png');" onclick="btn_create_marker()"></button>
+
+        <div id="markerForm" class="marker_form" style="display:none;">
+            <label>Name:</label>
+            <input id="marker_name" type="text" class="marker_form_input"><br>
+
+            <label>Description:</label>
+            <input id="marker_description" type="text" class="marker_form_input"><br>
+
+            <label>Privacy:</label>
+            <select id="marker_privacy" class="marker_form_input" onchange="onPrivacyChange()">
+              <option value="private">Only me</option>
+              <option value="contacts">Selected contacts</option>
+              <option value="public">Public (everyone)</option>
+            </select>
+
+            <div id="marker_contacts_picker" class="marker_contacts_picker" style="display:none;">
+              <!-- dynamically populated from tremola.contacts -->
+            </div>
+
+            <div class="marker_form_buttons">
+            <button id="saveMarkerBtn" class="map_icon_btn" style="background-image: url('img/checked.svg');" onclick="btn_add_marker()"></button>
+            <button id="cancelMarkerBtn" class="map_icon_btn" style="background-image: url('img/cancel.svg');" onclick="btn_cancel_marker()"></button>
+            </div>
+        </div>
+      </div>
+    </div>
 
     <!--  G A M E S -->
 
