@@ -357,6 +357,22 @@ function backend(cmdStr) { // send this to Kotlin (or simulate in case of browse
         // console.log('e=', JSON.stringify(e))
         b2f_new_event(e)
         console.log(e)
+    } else if (cmdStr[0] == 'map') {
+        var args = cmdStr[2]
+        if (args != "null") {
+            args = atob(cmdStr[2])
+            args = args.split(",").map(atob)
+        }
+        var e = {
+            'header': {
+                'tst': Date.now(),
+                'ref': Math.floor(1000000 * Math.random()),
+                'fid': myId
+            },
+            'confid': {},
+            'public': ["MAP", cmdStr[1]].concat(args)
+        }
+        b2f_new_in_order_event(e)
     } else {
         // console.log('backend', JSON.stringify(cmdStr))
     }
@@ -370,6 +386,7 @@ function resetTremola() { // wipes browser-side content
         "id": myId,
         "settings": {},
         "board": {},
+        "map": {}
     }
 
     var n = recps2nm([myId])
@@ -482,9 +499,23 @@ function b2f_new_in_order_event(e) {
             console.log("New kanban event")
             kanban_new_event(e)
             break
+        case "MAP":
+            console.log("New map event")
+            map_new_event(e)
+            break
         default:
             return
     }
+
+    if (e.confid) switch (e.confid[0]) {
+        case "MAP":
+            console.log("New encrypted map event")
+            map_new_event(e)
+            break
+        default:
+            return
+    }
+
     persist();
     must_redraw = true;
 }

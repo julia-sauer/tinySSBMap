@@ -40,6 +40,7 @@ import nz.scuttlebutt.tremolavossbol.utils.Constants.Companion.TINYSSB_APP_DELET
 import nz.scuttlebutt.tremolavossbol.utils.Constants.Companion.TINYSSB_APP_DLV
 import nz.scuttlebutt.tremolavossbol.utils.Constants.Companion.TINYSSB_APP_NEWTRUSTED
 import nz.scuttlebutt.tremolavossbol.utils.Constants.Companion.TINYSSB_APP_TICTACTOE
+import nz.scuttlebutt.tremolavossbol.utils.Constants.Companion.TINYSSB_APP_MAP
 import okio.ByteString.Companion.decodeHex
 
 
@@ -299,6 +300,13 @@ class WebAppInterface(val act: MainActivity, val webView: WebView) {
                 val argsList: List<String>? = if(args[4] != "null") Base64.decode(args[4], Base64.NO_WRAP).decodeToString().split(",").map{ Base64.decode(it, Base64.NO_WRAP).decodeToString()} else null
 
                 kanban(bid, prev , op, argsList)
+            }
+            "map" -> {
+                val op: String = args[1]
+                val argsList: List<String>? = if (args[2] != "null") Base64.decode(args[2], Base64.NO_WRAP).decodeToString().split(",").map { Base64.decode(it, Base64.NO_WRAP).decodeToString()} else null
+                val recpsList: List<String>? = if (args[3] != "null") Base64.decode(args[3], Base64.NO_WRAP).decodeToString().split(",").map { Base64.decode(it, Base64.NO_WRAP).decodeToString()} else null
+
+                map(op, argsList, recpsList)
             }
             "iam" -> {
                 val new_alias = Base64.decode(args[1], Base64.NO_WRAP).decodeToString()
@@ -773,6 +781,41 @@ class WebAppInterface(val act: MainActivity, val webView: WebView) {
         //if (body != null)
         //act.tinyNode.publish_public_content(body)
 
+    }
+
+    fun map(operation: String, args: List<String>?, recps: List<String>?) {
+        val lst = Bipf.mkList()
+        Bipf.list_append(lst, TINYSSB_APP_MAP)
+        Bipf.list_append(lst, Bipf.mkString(operation))
+
+        if (args != null) {
+            for (arg in args) {
+                if (Regex("^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?\$").matches(arg)) {
+                    Bipf.list_append(lst, Bipf.mkBytes(Base64.decode(arg, Base64.NO_WRAP)))
+                } else {
+                    Bipf.list_append(lst, Bipf.mkString(arg))
+                }
+            }
+        }
+
+        val body = Bipf.encode(lst)
+        if (body != null) {
+            if (recps != null && recps.isNotEmpty()) {
+                val keys: MutableList<ByteArray> = mutableListOf()
+                val me = act.idStore.identity.toRef()
+                for (r in recps) {
+                    if (r != me) keys.add(r.deRef())
+                }
+                keys.add(me.deRef())
+                val encrypted = act.idStore.identity.encryptPrivateMessage(body, keys)
+                val body_encr = Bipf.encode(Bipf.mkBytes(encrypted))
+                if (body_encr != null)
+                    act.tinyNode.publish_public_content(body_encr)
+            } else {
+                act.tinyNode.publish_public_content(body)
+            }
+            Log.d("map", "published: " + Bipf.decode(body))
+        }
     }
 
     fun return_voice(voice: ByteArray) {
