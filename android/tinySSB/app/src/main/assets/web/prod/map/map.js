@@ -86,7 +86,7 @@ function btn_add_marker() {
     } // if privacy === "public", recipients stays empty => meaning everyone
 
     var data = {
-        'cmd': [MapOp.MARKER_CREATE, name, description, currentLat.toString(), currentLon.toString()],
+        'cmd': [MapOp.MARKER_CREATE, name, description, currentLat.toString(), currentLon.toString(), privacy],
         'recps': recipients
     }
 
@@ -127,6 +127,7 @@ function map_new_event(e) {
                 'description': args[1],
                 'lat': parseFloat(args[2]),
                 'lon': parseFloat(args[3]),
+                'privacy': args[4],
                 'author': e.header.fid,
                 'when': e.header.tst
             }

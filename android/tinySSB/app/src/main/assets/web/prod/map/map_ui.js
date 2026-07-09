@@ -1,5 +1,45 @@
 // map_ui.js
 
+const greenIcon = new L.Icon({
+    iconUrl: "prod/map/leaflet/images/marker-icon-green.png",
+    shadowUrl: "prod/map/leaflet/images/marker-shadow.png",
+    iconSize: [25,41],
+    iconAnchor: [12,41],
+    popupAnchor: [1,-34]
+});
+
+const redIcon = new L.Icon({
+    iconUrl: "prod/map/leaflet/images/marker-icon-red.png",
+    shadowUrl: "prod/map/leaflet/images/marker-shadow.png",
+    iconSize: [25,41],
+    iconAnchor: [12,41],
+    popupAnchor: [1,-34]
+});
+
+const yellowIcon = new L.Icon({
+    iconUrl: "prod/map/leaflet/images/marker-icon-yellow.png",
+    shadowUrl: "prod/map/leaflet/images/marker-shadow.png",
+    iconSize: [25,41],
+    iconAnchor: [12,41],
+    popupAnchor: [1,-34]
+});
+
+const violetIcon = new L.Icon({
+    iconUrl: "prod/map/leaflet/images/marker-icon-violet.png",
+    shadowUrl: "prod/map/leaflet/images/marker-shadow.png",
+    iconSize: [25,41],
+    iconAnchor: [12,41],
+    popupAnchor: [1,-34]
+});
+
+const blackIcon = new L.Icon({
+    iconUrl: "prod/map/leaflet/images/marker-icon-black.png",
+    shadowUrl: "prod/map/leaflet/images/marker-shadow.png",
+    iconSize: [25,41],
+    iconAnchor: [12,41],
+    popupAnchor: [1,-34]
+});
+
 var leafletMarkers = {}
 
 function ui_add_marker(markerId) {
@@ -11,7 +51,7 @@ function ui_add_marker(markerId) {
     var contact = tremola.contacts[m.author];
     var authorName = contact ? contact.alias : m.author;
 
-    var lm = L.marker([m.lat, m.lon])
+    var lm = L.marker([m.lat, m.lon], {icon: getMarkerIcon(m)})
         .addTo(map).
         bindPopup(
             "<strong>" + escapeHTML(m.name) + "</strong><br>" + escapeHTML(m.description) + "<br>" +
@@ -34,4 +74,26 @@ function load_all_markers() {
     for (var markerId in tremola.map) {
         ui_add_marker(markerId);
     }
+}
+
+function getMarkerIcon(m) {
+
+    // Eigener Marker
+    if (m.author === myId) {
+
+        if (m.privacy === "private")
+            return redIcon;
+
+        if (m.privacy === "contacts")
+            return yellowIcon;
+
+        return greenIcon;
+    }
+
+    // Marker von anderen
+
+    if (m.author in tremola.contacts)
+        return violetIcon;
+
+    return blackIcon;
 }
