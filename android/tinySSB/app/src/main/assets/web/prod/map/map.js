@@ -37,9 +37,9 @@ function load_map() {
             if (myLocationMarker !== null) {
                 myLocationMarker.setLatLng([currentLat, currentLon]);
             } else {
-                myLocationMarker = L.marker([currentLat, currentLon])
+                /*myLocationMarker = L.marker([currentLat, currentLon])
                 .addTo(map)
-                .bindPopup("You are here");
+                .bindPopup("You are here"); */
             }
         },
         function(err) {
@@ -182,4 +182,21 @@ function getSelectedContacts() {
         }
     }
     return selected;
+}
+
+function btn_delete_marker(markerId, isOwn) {
+    ui_remove_marker(markerId); // close popup and remove from map
+
+    if (isOwn) {
+        // tell everyone to delete it if it's own marker
+        var data = {
+            'cmd': [MapOp.MARKER_DELETE, markerId],
+            'recps': null
+        }
+        map_send_to_backend(data);
+    }
+
+    // always remove locally regardless of ownership
+    delete tremola.map[markerId];
+    persist();
 }

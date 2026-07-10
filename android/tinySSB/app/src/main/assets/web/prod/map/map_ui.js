@@ -50,13 +50,22 @@ function ui_add_marker(markerId) {
 
     var contact = tremola.contacts[m.author];
     var authorName = contact ? contact.alias : m.author;
+    var isOwn = m.author === myId;
 
-    var lm = L.marker([m.lat, m.lon], {icon: getMarkerIcon(m)})
-        .addTo(map).
-        bindPopup(
-            "<strong>" + escapeHTML(m.name) + "</strong><br>" + escapeHTML(m.description) + "<br>" +
-            "<small>by " + escapeHTML(authorName) + "</small>",
-        )
+    var deleteLabel = isOwn ? "Delete for everyone" : "Delete for me";
+
+    var popupContent =
+            "<strong>" + escapeHTML(m.name) + "</strong><br>" +
+            escapeHTML(m.description) + "<br>" +
+            "<small>by " + escapeHTML(authorName) + "</small><br><br>" +
+            "<button onclick='btn_delete_marker(\"" + markerId + "\", " + isOwn + ")' " +
+            "style='border:none; background:none; cursor:pointer;' title='" + deleteLabel + "'>" +
+            "<img src='img/delete-bin.svg' style='width:20px; height:20px;'>" +
+            "</button>";
+
+        var lm = L.marker([m.lat, m.lon], {icon: getMarkerIcon(m)})
+            .addTo(map)
+            .bindPopup(popupContent);
     leafletMarkers[markerId] = lm
 }
 
