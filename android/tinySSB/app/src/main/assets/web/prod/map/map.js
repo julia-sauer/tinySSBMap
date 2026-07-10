@@ -37,9 +37,9 @@ function load_map() {
             if (myLocationMarker !== null) {
                 myLocationMarker.setLatLng([currentLat, currentLon]);
             } else {
-                /*myLocationMarker = L.marker([currentLat, currentLon])
+                myLocationMarker = L.marker([currentLat, currentLon])
                 .addTo(map)
-                .bindPopup("You are here"); */
+                .bindPopup("You are here");
             }
         },
         function(err) {
@@ -53,6 +53,35 @@ function load_map() {
     );
 
     load_all_markers();
+}
+
+function btn_update_location() {
+    navigator.geolocation.getCurrentPosition(
+        function(pos) {
+            currentLat = pos.coords.latitude;
+            currentLon = pos.coords.longitude;
+            console.log("Location updated:", currentLat, currentLon);
+
+            if (myLocationMarker !== null) {
+                myLocationMarker.setLatLng([currentLat, currentLon]);
+                myLocationMarker.getPopup().setContent("You are here");
+            } else {
+                myLocationMarker = L.marker([currentLat, currentLon])
+                    .addTo(map)
+                    .bindPopup("You are here");
+            }
+
+            map.panTo([currentLat, currentLon]); // go to new location
+        },
+        function(err) {
+            console.log("GPS error:", err.message);
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0 // force fresh GPS reading
+        }
+    );
 }
 
 function btn_create_marker() {
