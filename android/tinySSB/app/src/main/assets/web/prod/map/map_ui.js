@@ -93,6 +93,12 @@ function load_all_markers() {
         if (markerId === "_locations") {
             continue;
         }
+        if (markerId === "_locationPrivacy") {
+            continue;
+        }
+        if (markerId === "_locationContacts") {
+            continue;
+        }
         ui_add_marker(markerId);
     }
 }

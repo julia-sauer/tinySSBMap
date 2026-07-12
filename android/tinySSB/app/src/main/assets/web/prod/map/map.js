@@ -11,6 +11,12 @@ const MapOp = {
     LOCATION_UPDATE: 'map/location/update',
 }
 
+const locationPrivacyIcons = {
+    "private": "🔒",
+    "contacts": "👥",
+    "public": "🌍"
+};
+
 function load_map() {
     console.log("MAP OPENED");
     document.getElementById("div:map").style.display="block";
@@ -54,7 +60,8 @@ function load_map() {
     );
 
     load_all_markers();
-    load_live_locations()
+    load_live_locations();
+    restore_location_privacy();
 }
 
 function load_live_locations() {
@@ -64,6 +71,15 @@ function load_live_locations() {
     for (var fid in tremola.map._locations) {
         ui_update_live_location(fid);
     }
+}
+
+function restore_location_privacy() {
+    if (!tremola.map || !tremola.map._locationPrivacy) {
+        return;
+    }
+    var privacy = tremola.map._locationPrivacy;
+    document.getElementById("location_privacy_btn").textContent = locationPrivacyIcons[privacy];
+    document.querySelector('input[name="loc_privacy"][value="' + privacy + '"]').checked = true;
 }
 
 function btn_update_location() {
@@ -83,46 +99,29 @@ function btn_update_location() {
             }
             map.panTo([currentLat, currentLon]); // go to new location
 
-            var privacy = document.getElementById("location_privacy").value;
+            var privacy = tremola.map && tremola.map._locationPrivacy ? tremola.map._locationPrivacy : "private";
             if (privacy === "private") {
                 return;
             }
 
             var recipients = null;
             if (privacy === "contacts") {
-                recipients = getSelectedLocationContacts();
+                recipients = tremola.map._locationContacts || [];
                 if (recipients.length === 0) {
-                    alert("Please select at least one contact.");
                     return;
                 }
             }
 
             var data = {
-                'cmd': [MapOp.LOCATION_UPDATE, currentLat.toString(), currentLon.toString(), Date.now().toString(), privacy],
+                'cmd': [MapOp.LOCATION_UPDATE, currentLat.toString(),
+                    currentLon.toString(), Date.now().toString(), privacy],
                 'recps': recipients
             }
             map_send_to_backend(data);
         },
-        function(err) {
-            console.log("GPS error:", err.message);
-        },
-        {
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0 // force fresh GPS reading
-        }
+        function(err) { console.log("GPS error:", err.message); },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
-}
-
-function onLocationPrivacyChange() {
-    var privacy = document.getElementById("location_privacy").value;
-    var picker = document.getElementById("location_contacts_picker");
-    if (privacy === "contacts") {
-        picker.style.display = "block";
-        renderLocationContactPicker();
-    } else {
-        picker.style.display = "none";
-    }
 }
 
 function renderLocationContactPicker() {
@@ -316,4 +315,55 @@ function btn_delete_marker(markerId, isOwn) {
     // always remove locally regardless of ownership
     delete tremola.map[markerId];
     persist();
+}
+
+function btn_open_location_privacy_dialog() {
+    var saved = tremola.map && tremola.map._locationPrivacy ? tremola.map._locationPrivacy : "private";
+    document.querySelector('input[name="loc_privacy"][value="' + saved + '"]').checked = true;
+
+    if (saved === "contacts") {
+        document.getElementById("location_contacts_picker").style.display = "block";
+        renderLocationContactPicker();
+    } else {
+        document.getElementById("location_contacts_picker").style.display = "none";
+    }
+
+    document.getElementById("locationPrivacyDialog").style.display = "block";
+}
+
+function onLocationDialogPrivacyChange() {
+    var privacy = document.querySelector('input[name="loc_privacy"]:checked').value;
+    var picker = document.getElementById("location_contacts_picker");
+    if (privacy === "contacts") {
+        picker.style.display = "block";
+        renderLocationContactPicker();
+    } else {
+        picker.style.display = "none";
+    }
+}
+
+function btn_confirm_location_privacy() {
+    var privacy = document.querySelector('input[name="loc_privacy"]:checked').value;
+
+    if (privacy === "contacts") {
+        var selected = getSelectedLocationContacts();
+        if (selected.length === 0) {
+            alert("Please select at least one contact.");
+            return;
+        }
+        if (!tremola.map) tremola.map = {};
+        tremola.map._locationContacts = selected;
+    }
+
+    if (!tremola.map) tremola.map = {};
+    tremola.map._locationPrivacy = privacy;
+    persist();
+
+    // update the privacy button emoji
+    document.getElementById("location_privacy_btn").textContent = locationPrivacyIcons[privacy];
+    document.getElementById("locationPrivacyDialog").style.display = "none";
+}
+
+function btn_cancel_location_privacy() {
+    document.getElementById("locationPrivacyDialog").style.display = "none";
 }

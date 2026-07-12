@@ -344,15 +344,34 @@
         </div>
       </div>
       <div class="map_location_update_btn_container">
-        <select id="location_privacy" class="marker_form_input" onchange="onLocationPrivacyChange()" style="margin-bottom:5px; font-size:small;">
-          <option value="private">Only me (default)</option>
-          <option value="contacts">Selected contacts</option>
-          <option value="public">Everyone</option>
-        </select>
+        <button class="map_location_icon_btn" onclick="btn_update_location()" style="background-image: url('img/signal.svg');" title="Update my location"></button>
+        <button class="map_location_icon_btn" id="location_privacy_btn" onclick="btn_open_location_privacy_dialog()" title="Location sharing privacy"></button>
+      </div>
 
-        <div id="location_contacts_picker" class="marker_contacts_picker" style="display:none;"></div>
+      <!-- Location Privacy Dialog -->
+      <div id="locationPrivacyDialog" class="marker_form" style="display:none; position:absolute; top:60px; right:10px; z-index:1001; width:220px;">
 
-        <button class="map_location_icon_btn" onclick="btn_update_location()" style="background-image: url('img/signal.svg');"></button>
+        <label style="font-weight:bold; font-size:medium;">Who can see your location?</label>
+
+        <div class="marker_contact_row" style="margin-top:10px;">
+          <input type="radio" name="loc_privacy" id="loc_priv_private" value="private" checked>
+          <label for="loc_priv_private">🔒 Only me</label>
+        </div>
+        <div class="marker_contact_row">
+          <input type="radio" name="loc_privacy" id="loc_priv_contacts" value="contacts" onchange="onLocationDialogPrivacyChange()">
+          <label for="loc_priv_contacts">👥 Selected contacts</label>
+        </div>
+        <div class="marker_contact_row">
+          <input type="radio" name="loc_privacy" id="loc_priv_public" value="public" onchange="onLocationDialogPrivacyChange()">
+          <label for="loc_priv_public">🌍 Everyone</label>
+        </div>
+
+        <div id="location_contacts_picker" class="marker_contacts_picker" style="display:none; margin-top:8px;"></div>
+
+        <div class="marker_form_buttons" style="margin-top:10px;">
+          <button class="map_icon_btn" style="background-image: url('img/checked.svg');" onclick="btn_confirm_location_privacy()"></button>
+          <button class="map_icon_btn" style="background-image: url('img/cancel.svg');" onclick="btn_cancel_location_privacy()"></button>
+        </div>
       </div>
     </div>
 
