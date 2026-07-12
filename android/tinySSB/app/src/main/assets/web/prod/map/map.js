@@ -12,9 +12,9 @@ const MapOp = {
 }
 
 const locationPrivacyIcons = {
-    "private": "🔒",
-    "contacts": "👥",
-    "public": "🌍"
+    "private": "img/lock.svg",
+    "contacts": "img/contacts.svg",
+    "public": "img/globe.svg",
 };
 
 function load_map() {
@@ -78,7 +78,8 @@ function restore_location_privacy() {
         return;
     }
     var privacy = tremola.map._locationPrivacy;
-    document.getElementById("location_privacy_btn").textContent = locationPrivacyIcons[privacy];
+    document.getElementById("location_privacy_btn").textContent = "";
+    document.getElementById("location_privacy_btn").style.backgroundImage = "url('" + locationPrivacyIcons[privacy] + "')";
     document.querySelector('input[name="loc_privacy"][value="' + privacy + '"]').checked = true;
 }
 
@@ -364,7 +365,8 @@ function btn_confirm_location_privacy() {
     persist();
 
     // update the privacy button emoji
-    document.getElementById("location_privacy_btn").textContent = locationPrivacyIcons[privacy];
+    document.getElementById("location_privacy_btn").textContent = "";
+    document.getElementById("location_privacy_btn").style.backgroundImage = "url('" + locationPrivacyIcons[privacy] + "')";
     document.getElementById("locationPrivacyDialog").style.display = "none";
 }
 

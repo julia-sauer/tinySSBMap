@@ -107,8 +107,10 @@
     background-color: rgba(255, 255, 255, 0.47);
     background-repeat: no-repeat;
     background-position: center;
+    background-size: 60%;        /* ← this was missing */
     border-radius: 4pt;
     border-color: rgba(255, 255, 255, 0.47);
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
 }
 
 .map_location_privacy_select {

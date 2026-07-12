@@ -344,8 +344,8 @@
         </div>
       </div>
       <div class="map_location_update_btn_container">
-        <button class="map_location_icon_btn" onclick="btn_update_location()" style="background-image: url('img/signal.svg');" title="Update my location"></button>
-        <button class="map_location_icon_btn" id="location_privacy_btn" onclick="btn_open_location_privacy_dialog()" title="Location sharing privacy"></button>
+        <button class="map_location_icon_btn" onclick="btn_update_location()" style="background-image: url('img/signal.svg');"></button>
+        <button class="map_location_icon_btn" id="location_privacy_btn" onclick="btn_open_location_privacy_dialog()" style="background-image: url('img/lock.svg');"></button>
       </div>
 
       <!-- Location Privacy Dialog -->
@@ -354,16 +354,22 @@
         <label style="font-weight:bold; font-size:medium;">Who can see your location?</label>
 
         <div class="marker_contact_row" style="margin-top:10px;">
-          <input type="radio" name="loc_privacy" id="loc_priv_private" value="private" checked>
-          <label for="loc_priv_private">🔒 Only me</label>
+          <input type="radio" name="loc_privacy" id="loc_priv_private" value="private" checked onchange="onLocationDialogPrivacyChange()">
+          <label for="loc_priv_private">
+            <img src="img/lock.svg" style="width:16px; height:16px; vertical-align:middle;"> Only me
+          </label>
         </div>
         <div class="marker_contact_row">
           <input type="radio" name="loc_privacy" id="loc_priv_contacts" value="contacts" onchange="onLocationDialogPrivacyChange()">
-          <label for="loc_priv_contacts">👥 Selected contacts</label>
+          <label for="loc_priv_contacts">
+            <img src="img/contacts.svg" style="width:16px; height:16px; vertical-align:middle;"> Selected contacts
+          </label>
         </div>
         <div class="marker_contact_row">
           <input type="radio" name="loc_privacy" id="loc_priv_public" value="public" onchange="onLocationDialogPrivacyChange()">
-          <label for="loc_priv_public">🌍 Everyone</label>
+          <label for="loc_priv_public">
+            <img src="img/globe.svg" style="width:16px; height:16px; vertical-align:middle;"> Everyone
+          </label>
         </div>
 
         <div id="location_contacts_picker" class="marker_contacts_picker" style="display:none; margin-top:8px;"></div>
