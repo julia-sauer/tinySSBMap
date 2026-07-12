@@ -503,8 +503,6 @@ function b2f_new_in_order_event(e) {
             console.log("New map event")
             map_new_event(e)
             break
-        default:
-            return
     }
 
     if (e.confid) switch (e.confid[0]) {

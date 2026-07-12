@@ -8,6 +8,7 @@ let currentLon = null;
 const MapOp = {
     MARKER_CREATE: 'map/marker/create',
     MARKER_DELETE: 'map/marker/delete',
+    LOCATION_UPDATE: 'map/location/update',
 }
 
 function load_map() {
@@ -53,6 +54,16 @@ function load_map() {
     );
 
     load_all_markers();
+    load_live_locations()
+}
+
+function load_live_locations() {
+    if (!tremola.map || !tremola.map._locations) {
+        return;
+    }
+    for (var fid in tremola.map._locations) {
+        ui_update_live_location(fid);
+    }
 }
 
 function btn_update_location() {
@@ -70,8 +81,27 @@ function btn_update_location() {
                     .addTo(map)
                     .bindPopup("You are here");
             }
-
             map.panTo([currentLat, currentLon]); // go to new location
+
+            var privacy = document.getElementById("location_privacy").value;
+            if (privacy === "private") {
+                return;
+            }
+
+            var recipients = null;
+            if (privacy === "contacts") {
+                recipients = getSelectedLocationContacts();
+                if (recipients.length === 0) {
+                    alert("Please select at least one contact.");
+                    return;
+                }
+            }
+
+            var data = {
+                'cmd': [MapOp.LOCATION_UPDATE, currentLat.toString(), currentLon.toString(), Date.now().toString(), privacy],
+                'recps': recipients
+            }
+            map_send_to_backend(data);
         },
         function(err) {
             console.log("GPS error:", err.message);
@@ -82,6 +112,45 @@ function btn_update_location() {
             maximumAge: 0 // force fresh GPS reading
         }
     );
+}
+
+function onLocationPrivacyChange() {
+    var privacy = document.getElementById("location_privacy").value;
+    var picker = document.getElementById("location_contacts_picker");
+    if (privacy === "contacts") {
+        picker.style.display = "block";
+        renderLocationContactPicker();
+    } else {
+        picker.style.display = "none";
+    }
+}
+
+function renderLocationContactPicker() {
+    var picker = document.getElementById("location_contacts_picker");
+    picker.innerHTML = "";
+    for (var fid in tremola.contacts) {
+        if (fid === myId) {
+            continue;
+        }
+        var contact = tremola.contacts[fid];
+        var row = document.createElement("div");
+        row.className = "marker_contact_row";
+        row.innerHTML =
+            "<input type='checkbox' id='loc_contact_" + fid + "' value='" + fid + "'>" +
+            "<label for='loc_contact_" + fid + "'>" + escapeHTML(contact.alias) + "</label>";
+        picker.appendChild(row);
+    }
+}
+
+function getSelectedLocationContacts() {
+    var selected = [];
+    for (var fid in tremola.contacts) {
+        var checkbox = document.getElementById("loc_contact_" + fid);
+        if (checkbox && checkbox.checked) {
+            selected.push(fid);
+        }
+    }
+    return selected;
 }
 
 function btn_create_marker() {
@@ -168,6 +237,25 @@ function map_new_event(e) {
                 delete tremola.map[markerId];
                 ui_remove_marker(markerId);
             }
+            break;
+        case MapOp.LOCATION_UPDATE:
+            var authorFid = e.header.fid;
+
+            if (authorFid === myId) { // ignore own location events
+                break;
+            }
+
+            if (!tremola.map._locations) {
+                tremola.map._locations = {};
+            }
+
+            tremola.map._locations[authorFid] = {
+                'lat': parseFloat(args[0]),
+                'lon': parseFloat(args[1]),
+                'when': parseInt(args[2]),
+                'author': authorFid
+            }
+            ui_update_live_location(authorFid);
             break;
     }
     persist();

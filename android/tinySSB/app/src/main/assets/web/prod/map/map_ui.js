@@ -40,7 +40,16 @@ const blackIcon = new L.Icon({
     popupAnchor: [1,-34]
 });
 
+const personIcon = new L.Icon({
+    iconUrl: "prod/map/leaflet/images/marker-icon-person.png",
+    shadowUrl: "prod/map/leaflet/images/marker-shadow.png",
+    iconSize: [25,41],
+    iconAnchor: [12,41],
+    popupAnchor: [1,-34]
+});
+
 var leafletMarkers = {}
+var liveLocationMarkers = {}
 
 function ui_add_marker(markerId) {
     var m = tremola.map[markerId];
@@ -81,6 +90,9 @@ function load_all_markers() {
         return;
     }
     for (var markerId in tremola.map) {
+        if (markerId === "_locations") {
+            continue;
+        }
         ui_add_marker(markerId);
     }
 }
@@ -105,4 +117,30 @@ function getMarkerIcon(m) {
         return violetIcon;
 
     return blackIcon;
+}
+
+function ui_update_live_location(fid) {
+    var loc = tremola.map._locations[fid];
+    if (!loc) {
+        return;
+    }
+
+    var contact = tremola.contacts[fid];
+    var name = contact ? contact.alias : fid;
+    var date = new Date(loc.when);
+    var timeStr = date.toLocaleDateString() + " " + date.toTimeString().substring(0, 5);
+
+    var popupContent =
+        "<strong>" + escapeHTML(name) + "</strong><br>" +
+        "<small>Last updated: " + timeStr + "</small>";
+
+    if (fid in liveLocationMarkers) {
+        // update existing marker
+        liveLocationMarkers[fid].setLatLng([loc.lat, loc.lon]);
+        liveLocationMarkers[fid].getPopup().setContent(popupContent);
+    } else {
+        liveLocationMarkers[fid] = L.marker([loc.lat, loc.lon], {
+            icon: personIcon
+        }).addTo(map).bindPopup(popupContent);
+    }
 }

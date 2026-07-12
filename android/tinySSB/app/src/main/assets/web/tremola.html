@@ -344,6 +344,14 @@
         </div>
       </div>
       <div class="map_location_update_btn_container">
+        <select id="location_privacy" class="marker_form_input" onchange="onLocationPrivacyChange()" style="margin-bottom:5px; font-size:small;">
+          <option value="private">Only me (default)</option>
+          <option value="contacts">Selected contacts</option>
+          <option value="public">Everyone</option>
+        </select>
+
+        <div id="location_contacts_picker" class="marker_contacts_picker" style="display:none;"></div>
+
         <button class="map_location_icon_btn" onclick="btn_update_location()" style="background-image: url('img/signal.svg');"></button>
       </div>
     </div>
