@@ -127,15 +127,19 @@ function btn_update_location() {
 function renderLocationContactPicker() {
     var picker = document.getElementById("location_contacts_picker");
     picker.innerHTML = "";
+
+    var savedContacts = tremola.map && tremola.map._locationContacts ? tremola.map._locationContacts : [];
+
     for (var fid in tremola.contacts) {
         if (fid === myId) {
             continue;
         }
         var contact = tremola.contacts[fid];
+        var isChecked = savedContacts.indexOf(fid) >= 0 ? "checked" : "";
         var row = document.createElement("div");
         row.className = "marker_contact_row";
         row.innerHTML =
-            "<input type='checkbox' id='loc_contact_" + fid + "' value='" + fid + "'>" +
+            "<input type='checkbox' id='loc_contact_" + fid + "' value='" + fid + "' " + isChecked + ">" +
             "<label for='loc_contact_" + fid + "'>" + escapeHTML(contact.alias) + "</label>";
         picker.appendChild(row);
     }
