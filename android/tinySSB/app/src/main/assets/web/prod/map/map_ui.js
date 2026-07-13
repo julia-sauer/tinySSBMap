@@ -150,3 +150,10 @@ function ui_update_live_location(fid) {
         }).addTo(map).bindPopup(popupContent);
     }
 }
+
+function ui_remove_live_location(fid) {
+    if (fid in liveLocationMarkers) {
+        map.removeLayer(liveLocationMarkers[fid]);
+        delete liveLocationMarkers[fid];
+    }
+}

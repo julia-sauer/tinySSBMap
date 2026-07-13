@@ -9,6 +9,7 @@ const MapOp = {
     MARKER_CREATE: 'map/marker/create',
     MARKER_DELETE: 'map/marker/delete',
     LOCATION_UPDATE: 'map/location/update',
+    LOCATION_REMOVE: 'map/location/remove',
 }
 
 const locationPrivacyIcons = {
@@ -261,6 +262,13 @@ function map_new_event(e) {
             }
             ui_update_live_location(authorFid);
             break;
+        case MapOp.LOCATION_REMOVE:
+            var authorFid = e.header.fid;
+            if (tremola.map._locations && authorFid in tremola.map._locations) {
+                delete tremola.map._locations[authorFid];
+                ui_remove_live_location(authorFid);
+            }
+            break;
     }
     persist();
 }
@@ -349,6 +357,8 @@ function onLocationDialogPrivacyChange() {
 
 function btn_confirm_location_privacy() {
     var privacy = document.querySelector('input[name="loc_privacy"]:checked').value;
+    var oldPrivacy = tremola.map && tremola.map._locationPrivacy ? tremola.map._locationPrivacy : "private";
+    var oldContacts = tremola.map && tremola.map._locationContacts ? tremola.map._locationContacts : [];
 
     if (privacy === "contacts") {
         var selected = getSelectedLocationContacts();
@@ -364,6 +374,11 @@ function btn_confirm_location_privacy() {
     tremola.map._locationPrivacy = privacy;
     persist();
 
+    send_location_remove_to_revoked(oldPrivacy, oldContacts, privacy, tremola.map._locationContacts || []);
+    if (privacy !== "private" && oldPrivacy === "private") {
+        btn_update_location();
+    }
+
     // update the privacy button emoji
     document.getElementById("location_privacy_btn").textContent = "";
     document.getElementById("location_privacy_btn").style.backgroundImage = "url('" + locationPrivacyIcons[privacy] + "')";
@@ -372,4 +387,43 @@ function btn_confirm_location_privacy() {
 
 function btn_cancel_location_privacy() {
     document.getElementById("locationPrivacyDialog").style.display = "none";
+}
+
+function send_location_remove_to_revoked(oldPrivacy, oldContacts, newPrivacy, newContacts) {
+    var revoked = [];
+
+    if (oldPrivacy === "public" && newPrivacy !== "public") {
+        var data = {
+            'cmd': [MapOp.LOCATION_REMOVE],
+            'recps': null
+        }
+        map_send_to_backend(data);
+        return;
+    }
+
+    if (oldPrivacy === "contacts" && newPrivacy === "private") {
+        revoked = oldContacts;
+    } else if (oldPrivacy === "contacts" && newPrivacy === "contacts") {
+        revoked = oldContacts.filter(function (fid) {
+            return newContacts.indexOf(fid) < 0;
+        });
+    } else if (oldPrivacy === "public" && newPrivacy === "contacts") {
+        var data = {
+            'cmd': [MapOp.LOCATION_REMOVE],
+            'recps': null
+        }
+        map_send_to_backend(data);
+        return;
+    }
+
+    if (revoked.length === 0) {
+        return;
+    }
+
+    var recipients = revoked.concat([myId]);
+    var data = {
+        'cmd': [MapOp.LOCATION_REMOVE],
+        'recps': recipients
+    }
+    map_send_to_backend(data);
 }
