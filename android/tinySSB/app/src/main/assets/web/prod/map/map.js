@@ -188,8 +188,10 @@ function btn_add_marker() {
         recipients = [myId]
     } // if privacy === "public", recipients stays empty => meaning everyone
 
+    var markerId = myId + "_" + Date.now().toString();
+
     var data = {
-        'cmd': [MapOp.MARKER_CREATE, name, description, currentLat.toString(), currentLon.toString(), privacy],
+        'cmd': [MapOp.MARKER_CREATE, markerId, name, description, currentLat.toString(), currentLon.toString(), privacy],
         'recps': recipients
     }
 
@@ -223,14 +225,15 @@ function map_new_event(e) {
 
     switch (op) {
         case MapOp.MARKER_CREATE:
-            var markerId = e.header.ref
+            var markerId = args[0];
+            console.log("MARKER_CREATE key:", markerId, "author:", e.header.fid);
             tremola.map[markerId] = {
                 'id': markerId,
-                'name': args[0],
-                'description': args[1],
-                'lat': parseFloat(args[2]),
-                'lon': parseFloat(args[3]),
-                'privacy': args[4],
+                'name': args[1],
+                'description': args[2],
+                'lat': parseFloat(args[3]),
+                'lon': parseFloat(args[4]),
+                'privacy': args[5],
                 'author': e.header.fid,
                 'when': e.header.tst
             }
@@ -238,6 +241,9 @@ function map_new_event(e) {
             break;
         case MapOp.MARKER_DELETE:
             var markerId = args[0];
+            console.log("MARKER_DELETE received, markerId:", markerId);
+            console.log("tremola.map keys:", Object.keys(tremola.map));
+            console.log("markerId in tremola.map:", markerId in tremola.map);
             if (markerId in tremola.map) {
                 delete tremola.map[markerId];
                 ui_remove_marker(markerId);
@@ -314,6 +320,8 @@ function getSelectedContacts() {
 }
 
 function btn_delete_marker(markerId, isOwn) {
+    console.log("btn_delete_marker markerId:", markerId);
+    console.log("Alice tremola.map keys:", Object.keys(tremola.map));
     ui_remove_marker(markerId); // close popup and remove from map
 
     if (isOwn) {
