@@ -1,7 +1,12 @@
 // map.js
 
+// the user's map
 let map = null;
+
+// marker of the current location
 let myLocationMarker = null;
+
+// coordinates of the current location
 let currentLat = null;
 let currentLon = null;
 
@@ -18,6 +23,7 @@ const locationPrivacyIcons = {
     "public": "img/globe.svg",
 };
 
+// initializes the map including markers and centers the view to the user's location
 function load_map() {
     console.log("MAP OPENED");
     document.getElementById("div:map").style.display="block";
@@ -65,6 +71,7 @@ function load_map() {
     restore_location_privacy();
 }
 
+// loads all shared live locations onto the map
 function load_live_locations() {
     if (!tremola.map || !tremola.map._locations) {
         return;
@@ -74,6 +81,7 @@ function load_live_locations() {
     }
 }
 
+// restores the saved live location privacy setting in the UI
 function restore_location_privacy() {
     if (!tremola.map || !tremola.map._locationPrivacy) {
         return;
@@ -84,6 +92,7 @@ function restore_location_privacy() {
     document.querySelector('input[name="loc_privacy"][value="' + privacy + '"]').checked = true;
 }
 
+// updates the user's current location and shares it based on privacy settings
 function btn_update_location() {
     navigator.geolocation.getCurrentPosition(
         function(pos) {
@@ -126,6 +135,7 @@ function btn_update_location() {
     );
 }
 
+// displays the contact selection list for location sharing
 function renderLocationContactPicker() {
     var picker = document.getElementById("location_contacts_picker");
     picker.innerHTML = "";
@@ -147,6 +157,7 @@ function renderLocationContactPicker() {
     }
 }
 
+// returns the list of contacts selected for location sharing
 function getSelectedLocationContacts() {
     var selected = [];
     for (var fid in tremola.contacts) {
@@ -158,10 +169,12 @@ function getSelectedLocationContacts() {
     return selected;
 }
 
+// opens the dialog for creating a new marker
 function btn_create_marker() {
     document.getElementById("markerForm").style.display = "block";
 }
 
+// creates a new marker and sends it to the backend
 function btn_add_marker() {
     var name = document.getElementById("marker_name").value;
     var description = document.getElementById("marker_description").value;
@@ -200,10 +213,12 @@ function btn_add_marker() {
     document.getElementById("markerForm").style.display = "none"; // close marker menu
 }
 
+// closes the marker creation dialog without saving
 function btn_cancel_marker() {
     document.getElementById("markerForm").style.display = "none";
 }
 
+// encodes and sends a map command to the backend
 function map_send_to_backend(data) {
     var op = data['cmd'][0]
     var args = data['cmd'].length > 1 ? btoa(data['cmd'].slice(1).map(unicodeStringToTypedArray).map(btoa)) : "null"
@@ -213,6 +228,7 @@ function map_send_to_backend(data) {
     backend(to_backend.join(" "))
 }
 
+// processes incoming map events and updates the local map state
 function map_new_event(e) {
     console.log("map_new_event received:", e);
     var payload = e.public || e.confid;  // public for everyone, confid for encrypted
@@ -279,6 +295,7 @@ function map_new_event(e) {
     persist();
 }
 
+// updates the marker contact picker when the privacy setting changes
 function onPrivacyChange() {
     var privacy = document.getElementById("marker_privacy").value;
     var picker = document.getElementById("marker_contacts_picker");
@@ -291,6 +308,7 @@ function onPrivacyChange() {
     }
 }
 
+// displays the contact selection list for marker sharing
 function renderContactPicker() {
     var picker = document.getElementById("marker_contacts_picker");
     picker.innerHTML = "";
@@ -308,6 +326,7 @@ function renderContactPicker() {
     }
 }
 
+// returns the contacts selected for a shared marker
 function getSelectedContacts() {
     var selected = [];
     for (var fid in tremola.contacts) {
@@ -319,13 +338,14 @@ function getSelectedContacts() {
     return selected;
 }
 
+// deletes a marker locally and notifies others if it's the own marker
 function btn_delete_marker(markerId, isOwn) {
     console.log("btn_delete_marker markerId:", markerId);
     console.log("Alice tremola.map keys:", Object.keys(tremola.map));
     ui_remove_marker(markerId); // close popup and remove from map
 
     if (isOwn) {
-        // tell everyone to delete it if it's own marker
+        // tell everyone to delete it if it's the own marker
         var data = {
             'cmd': [MapOp.MARKER_DELETE, markerId],
             'recps': null
@@ -338,6 +358,7 @@ function btn_delete_marker(markerId, isOwn) {
     persist();
 }
 
+// opens the live location privacy settings dialog
 function btn_open_location_privacy_dialog() {
     var saved = tremola.map && tremola.map._locationPrivacy ? tremola.map._locationPrivacy : "private";
     document.querySelector('input[name="loc_privacy"][value="' + saved + '"]').checked = true;
@@ -352,6 +373,7 @@ function btn_open_location_privacy_dialog() {
     document.getElementById("locationPrivacyDialog").style.display = "block";
 }
 
+// updates the location contact picker when the privacy option changes
 function onLocationDialogPrivacyChange() {
     var privacy = document.querySelector('input[name="loc_privacy"]:checked').value;
     var picker = document.getElementById("location_contacts_picker");
@@ -363,6 +385,7 @@ function onLocationDialogPrivacyChange() {
     }
 }
 
+// saves the selected location privacy settings and applies the changes
 function btn_confirm_location_privacy() {
     var privacy = document.querySelector('input[name="loc_privacy"]:checked').value;
     var oldPrivacy = tremola.map && tremola.map._locationPrivacy ? tremola.map._locationPrivacy : "private";
@@ -393,10 +416,12 @@ function btn_confirm_location_privacy() {
     document.getElementById("locationPrivacyDialog").style.display = "none";
 }
 
+// closes the location privacy dialog without saving
 function btn_cancel_location_privacy() {
     document.getElementById("locationPrivacyDialog").style.display = "none";
 }
 
+// sends location removal events to users who no longer have access
 function send_location_remove_to_revoked(oldPrivacy, oldContacts, newPrivacy, newContacts) {
     var revoked = [];
 
@@ -439,9 +464,12 @@ function send_location_remove_to_revoked(oldPrivacy, oldContacts, newPrivacy, ne
 // id of marker that is edited
 var currentEditMarkerId = null;
 
+// opens the marker edit dialog and loads the marker's current data
 function btn_open_edit_marker(markerId) {
     var m = tremola.map[markerId];
-    if (!m) return;
+    if (!m) {
+        return;
+    }
 
     currentEditMarkerId = markerId;
 
@@ -463,6 +491,7 @@ function btn_open_edit_marker(markerId) {
     document.getElementById("markerEditForm").style.display = "block";
 }
 
+// updates the edit contact picker when the marker privacy changes
 function onEditPrivacyChange() {
     var privacy = document.getElementById("marker_edit_privacy").value;
     var picker = document.getElementById("marker_edit_contacts_picker");
@@ -474,6 +503,7 @@ function onEditPrivacyChange() {
     }
 }
 
+// displays the contact selection list for editing a shared marker
 function renderEditContactPicker() {
     var picker = document.getElementById("marker_edit_contacts_picker");
     picker.innerHTML = "";
@@ -492,15 +522,19 @@ function renderEditContactPicker() {
     }
 }
 
+// returns the contacts selected while editing a marker
 function getSelectedEditContacts() {
     var selected = [];
     for (var fid in tremola.contacts) {
         var checkbox = document.getElementById("edit_contact_" + fid);
-        if (checkbox && checkbox.checked) selected.push(fid);
+        if (checkbox && checkbox.checked) {
+            selected.push(fid);
+        }
     }
     return selected;
 }
 
+// saves the edited marker by replacing the old marker with a new one (delete old, create new marker)
 function btn_save_edit_marker() {
 
     var old = tremola.map[currentEditMarkerId];
@@ -561,6 +595,7 @@ function btn_save_edit_marker() {
     currentEditMarkerId = null;
 }
 
+// closes the marker edit dialog without saving
 function btn_cancel_edit_marker() {
     document.getElementById("markerEditForm").style.display = "none";
     currentEditMarkerId = null;

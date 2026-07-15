@@ -315,10 +315,12 @@
 
     </div>
 
+    <!-- map -->
     <div id="div:map" style="display: none; height: 100%; width: 100%; position: relative;">
       <div id="map-buttons" class="map_buttons_container">
         <button class="map_create_marker_btn" style="background-image: url('prod/map/leaflet/images/marker-icon-2x.png');" onclick="btn_create_marker()"></button>
 
+        <!--  Create marker dialog -->
         <div id="markerForm" class="marker_form" style="display:none;">
             <label>Name:</label>
             <input id="marker_name" type="text" class="marker_form_input"><br>
@@ -333,9 +335,7 @@
               <option value="public">Public (everyone)</option>
             </select>
 
-            <div id="marker_contacts_picker" class="marker_contacts_picker" style="display:none;">
-              <!-- dynamically populated from tremola.contacts -->
-            </div>
+            <div id="marker_contacts_picker" class="marker_contacts_picker" style="display:none;"></div>
 
             <div class="marker_form_buttons">
             <button id="saveMarkerBtn" class="map_icon_btn" style="background-image: url('img/checked.svg');" onclick="btn_add_marker()"></button>
@@ -343,6 +343,7 @@
             </div>
         </div>
 
+        <!--  Edit marker dialog -->
         <div id="markerEditForm" class="marker_form" style="display:none;">
           <label>Name:</label>
           <input id="marker_edit_name" type="text" class="marker_form_input"><br>

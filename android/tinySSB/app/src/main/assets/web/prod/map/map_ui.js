@@ -51,6 +51,7 @@ const personIcon = new L.Icon({
 var leafletMarkers = {}
 var liveLocationMarkers = {}
 
+// creates and displays a map marker with its popup and buttons
 function ui_add_marker(markerId) {
     var m = tremola.map[markerId];
     if (!m) {
@@ -85,6 +86,7 @@ function ui_add_marker(markerId) {
     leafletMarkers[markerId] = lm;
 }
 
+// removes a marker from the map and internal marker list
 function ui_remove_marker(markerId) {
     if (markerId in leafletMarkers) {
         map.removeLayer(leafletMarkers[markerId]);
@@ -92,6 +94,7 @@ function ui_remove_marker(markerId) {
     }
 }
 
+// loads and displays all stored markers on the map
 function load_all_markers() {
     if (!tremola.map) {
         return;
@@ -110,6 +113,7 @@ function load_all_markers() {
     }
 }
 
+// returns the appropriate marker icon based on author and privacy
 function getMarkerIcon(m) {
 
     // Eigener Marker
@@ -124,14 +128,14 @@ function getMarkerIcon(m) {
         return greenIcon;
     }
 
-    // Marker von anderen
-
+    // marker of other peer
     if (m.author in tremola.contacts)
         return violetIcon;
 
     return blackIcon;
 }
 
+// creates or updates a live location marker of a peer
 function ui_update_live_location(fid) {
     var loc = tremola.map._locations[fid];
     if (!loc) {
@@ -158,6 +162,7 @@ function ui_update_live_location(fid) {
     }
 }
 
+// remove a user's live location marker from the map
 function ui_remove_live_location(fid) {
     if (fid in liveLocationMarkers) {
         map.removeLayer(liveLocationMarkers[fid]);
