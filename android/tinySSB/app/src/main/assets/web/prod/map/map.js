@@ -192,7 +192,7 @@ function btn_add_marker() {
 
     var data = {
         'cmd': [MapOp.MARKER_CREATE, markerId, name, description, currentLat.toString(), currentLon.toString(), privacy],
-        'recps': recipients
+        'recps': recipients.length > 0 ? recipients : null
     }
 
     console.log("Name: " + name + " Description: " + description + " Privacy: " + privacy);
@@ -434,4 +434,134 @@ function send_location_remove_to_revoked(oldPrivacy, oldContacts, newPrivacy, ne
         'recps': recipients
     }
     map_send_to_backend(data);
+}
+
+// id of marker that is edited
+var currentEditMarkerId = null;
+
+function btn_open_edit_marker(markerId) {
+    var m = tremola.map[markerId];
+    if (!m) return;
+
+    currentEditMarkerId = markerId;
+
+    // pre-fill form with current values
+    document.getElementById("marker_edit_name").value = m.name;
+    document.getElementById("marker_edit_description").value = m.description;
+    document.getElementById("marker_edit_privacy").value = m.privacy;
+
+    // show contacts picker if needed
+    if (m.privacy === "contacts") {
+        document.getElementById("marker_edit_contacts_picker").style.display = "block";
+        renderEditContactPicker();
+    } else {
+        document.getElementById("marker_edit_contacts_picker").style.display = "none";
+    }
+
+    // close the popup and open the edit form
+    leafletMarkers[markerId].closePopup();
+    document.getElementById("markerEditForm").style.display = "block";
+}
+
+function onEditPrivacyChange() {
+    var privacy = document.getElementById("marker_edit_privacy").value;
+    var picker = document.getElementById("marker_edit_contacts_picker");
+    if (privacy === "contacts") {
+        picker.style.display = "block";
+        renderEditContactPicker();
+    } else {
+        picker.style.display = "none";
+    }
+}
+
+function renderEditContactPicker() {
+    var picker = document.getElementById("marker_edit_contacts_picker");
+    picker.innerHTML = "";
+
+    for (var fid in tremola.contacts) {
+        if (fid === myId) {
+            continue;
+        }
+        var contact = tremola.contacts[fid];
+        var row = document.createElement("div");
+        row.className = "marker_contact_row";
+        row.innerHTML =
+            "<input type='checkbox' id='edit_contact_" + fid + "' value='" + fid + "'>" +
+            "<label for='edit_contact_" + fid + "'>" + escapeHTML(contact.alias) + "</label>";
+        picker.appendChild(row);
+    }
+}
+
+function getSelectedEditContacts() {
+    var selected = [];
+    for (var fid in tremola.contacts) {
+        var checkbox = document.getElementById("edit_contact_" + fid);
+        if (checkbox && checkbox.checked) selected.push(fid);
+    }
+    return selected;
+}
+
+function btn_save_edit_marker() {
+
+    var old = tremola.map[currentEditMarkerId];
+    if (!old) {
+        return;
+    }
+
+    var name = document.getElementById("marker_edit_name").value.trim();
+    var description = document.getElementById("marker_edit_description").value.trim();
+    var privacy = document.getElementById("marker_edit_privacy").value;
+
+    if (name === "") {
+        alert("Please enter a name.");
+        return;
+    }
+
+    var recipients = [];
+
+    if (privacy === "contacts") {
+        recipients = getSelectedEditContacts();
+
+        if (recipients.length === 0) {
+            alert("Please select at least one contact.");
+            return;
+        }
+
+    } else if (privacy === "private") {
+        recipients = [myId];
+    }
+
+    // delete old marker
+    map_send_to_backend({
+        cmd: [MapOp.MARKER_DELETE, old.id],
+        recps: null
+    });
+
+    // create new marker
+    var newMarkerId = myId + "_" + Date.now();
+
+    map_send_to_backend({
+        cmd: [
+            MapOp.MARKER_CREATE,
+            newMarkerId,
+            name,
+            description,
+            old.lat.toString(),
+            old.lon.toString(),
+            privacy
+        ],
+        recps: recipients
+    });
+
+    // remove locally
+    ui_remove_marker(old.id);
+    delete tremola.map[old.id];
+
+    document.getElementById("markerEditForm").style.display = "none";
+    currentEditMarkerId = null;
+}
+
+function btn_cancel_edit_marker() {
+    document.getElementById("markerEditForm").style.display = "none";
+    currentEditMarkerId = null;
 }

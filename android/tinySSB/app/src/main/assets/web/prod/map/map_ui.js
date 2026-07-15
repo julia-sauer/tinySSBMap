@@ -63,19 +63,26 @@ function ui_add_marker(markerId) {
 
     var deleteLabel = isOwn ? "Delete for everyone" : "Delete for me";
 
-    var popupContent =
-            "<strong>" + escapeHTML(m.name) + "</strong><br>" +
-            escapeHTML(m.description) + "<br>" +
-            "<small>by " + escapeHTML(authorName) + "</small><br><br>" +
-            "<button onclick='btn_delete_marker(\"" + markerId + "\", " + isOwn + ")' " +
-            "style='border:none; background:none; cursor:pointer;' title='" + deleteLabel + "'>" +
-            "<img src='img/delete-bin.svg' style='width:20px; height:20px;'>" +
-            "</button>";
+    var editButton = isOwn ?
+        "<button onclick='btn_open_edit_marker(\"" + markerId + "\")' " +
+        "style='border:none; background:none; cursor:pointer;' title='Edit marker'>" +
+        "<img src='img/pen.png' style='width:20px; height:20px;'>" +
+        "</button>" : "";
 
-        var lm = L.marker([m.lat, m.lon], {icon: getMarkerIcon(m)})
-            .addTo(map)
-            .bindPopup(popupContent);
-    leafletMarkers[markerId] = lm
+    var popupContent =
+        "<strong>" + escapeHTML(m.name) + "</strong><br>" +
+        escapeHTML(m.description) + "<br>" +
+        "<small>by " + escapeHTML(authorName) + "</small><br><br>" +
+        editButton +
+        "<button onclick='btn_delete_marker(\"" + markerId + "\", " + isOwn + ")' " +
+        "style='border:none; background:none; cursor:pointer;' title='" + deleteLabel + "'>" +
+        "<img src='img/delete-bin.svg' style='width:20px; height:20px;'>" +
+        "</button>";
+
+    var lm = L.marker([m.lat, m.lon], {icon: getMarkerIcon(m)})
+        .addTo(map)
+        .bindPopup(popupContent);
+    leafletMarkers[markerId] = lm;
 }
 
 function ui_remove_marker(markerId) {
